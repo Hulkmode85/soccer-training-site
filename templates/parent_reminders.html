@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Reminders - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-bell me-3"></i>Class Reminders</h1>
+        <p class="lead opacity-85">Automatic reminders sent 24 hours and 1 hour before each class</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="portal-card">
+                    <h5><i class="fas fa-bell me-2"></i>Reminder History</h5>
+
+                    <div class="mb-3 p-3" style="background:#e8f5e9;border-radius:var(--radius-sm);">
+                        <small>
+                            <i class="fas fa-info-circle text-success me-1"></i>
+                            Reminders are automatically sent <strong>24 hours</strong> and <strong>1 hour</strong> before each scheduled class.
+                            You will receive notifications for all enrolled children.
+                        </small>
+                    </div>
+
+                    {% if reminders %}
+                    {% for reminder in reminders %}
+                    <div class="enrollment-item">
+                        <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                            {% if reminder.reminder_type == '1hr' %}background:#fff3cd;color:#856404;{% else %}background:#cce5ff;color:#004085;{% endif %}">
+                            <i class="fas fa-{% if reminder.reminder_type == '1hr' %}bell{% else %}clock{% endif %}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <strong style="color:var(--primary);">
+                                {{ reminder.enrollment.class_session.program.name }} -
+                                {{ reminder.enrollment.child.name }}
+                            </strong>
+                            <small class="text-muted d-block">
+                                {% if reminder.reminder_type == '24hr' %}
+                                <span class="badge bg-info">24hr Reminder</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">1hr Reminder</span>
+                                {% endif %}
+                                Sent {{ reminder.sent_at.strftime('%b %d, %Y at %I:%M %p') }}
+                            </small>
+                            <small class="text-muted">
+                                Class: {{ reminder.enrollment.class_session.start_time.strftime('%b %d at %I:%M %p') }}
+                                at {{ reminder.enrollment.class_session.location }}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-bell-slash fa-3x mb-3 opacity-25"></i>
+                        <p>No reminders sent yet. Reminders will appear here as your classes approach.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('parent_dashboard') }}" class="btn-outline-custom">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

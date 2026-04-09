@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Messages - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-envelope me-3"></i>Messages</h1>
+        <p class="lead opacity-85">Communicate with your coach</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Message Thread -->
+                <div class="portal-card">
+                    <h5><i class="fas fa-comments me-2"></i>Conversation with Coach</h5>
+
+                    <div class="message-thread" style="max-height:500px;overflow-y:auto;padding:1rem;" id="messageThread">
+                        {% if messages %}
+                        {% for msg in messages %}
+                        <div class="message-bubble {{ 'sent' if msg.sender == 'parent' else 'received' }} mb-3">
+                            <div class="d-flex align-items-start gap-2 {% if msg.sender == 'parent' %}flex-row-reverse{% endif %}">
+                                <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.8rem;flex-shrink:0;
+                                    background:{% if msg.sender == 'parent' %}var(--gradient-accent){% else %}var(--gradient-primary){% endif %};">
+                                    {% if msg.sender == 'parent' %}{{ parent.name[0] }}{% else %}<i class="fas fa-futbol" style="font-size:0.7rem;"></i>{% endif %}
+                                </div>
+                                <div class="message-content p-3 {% if msg.sender == 'parent' %}bg-sent{% else %}bg-received{% endif %}"
+                                     style="border-radius:var(--radius-md);max-width:80%;
+                                     {% if msg.sender == 'parent' %}background:linear-gradient(135deg, #52b788, #40916c);color:white;{% else %}background:var(--off-white);{% endif %}">
+                                    {% if msg.subject %}
+                                    <strong style="font-size:0.85rem;">{{ msg.subject }}</strong><br>
+                                    {% endif %}
+                                    {% if msg.is_broadcast %}
+                                    <span style="font-size:0.7rem;opacity:0.8;"><i class="fas fa-bullhorn me-1"></i>Broadcast</span><br>
+                                    {% endif %}
+                                    <span style="font-size:0.9rem;">{{ msg.body }}</span>
+                                    <div style="font-size:0.7rem;opacity:0.6;margin-top:0.5rem;text-align:right;">
+                                        {{ msg.sent_at.strftime('%b %d, %I:%M %p') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-comments fa-3x mb-3 opacity-25"></i>
+                            <p>No messages yet. Send the coach a message below.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Send Message -->
+                <div class="portal-card">
+                    <h5><i class="fas fa-paper-plane me-2"></i>Send a Message</h5>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Subject (optional)</label>
+                            <input type="text" name="subject" class="form-control" placeholder="e.g. Question about schedule">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message *</label>
+                            <textarea name="body" class="form-control" rows="3" required placeholder="Type your message to the coach..."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('parent_dashboard') }}" class="btn-outline-custom">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn-primary-custom">
+                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-scroll to bottom of message thread
+var thread = document.getElementById('messageThread');
+if (thread) thread.scrollTop = thread.scrollHeight;
+</script>
+{% endblock %}

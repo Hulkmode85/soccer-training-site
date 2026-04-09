@@ -1,0 +1,60 @@
+{% extends "admin_base.html" %}
+{% block title %}Programs - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 style="color:var(--primary);font-weight:800;">
+        <i class="fas fa-futbol me-2"></i>Programs
+    </h3>
+    <a href="{{ url_for('admin_program_new') }}" class="btn-primary-custom">
+        <i class="fas fa-plus me-2"></i>New Program
+    </a>
+</div>
+
+<div class="portal-card">
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr>
+                    <th>Program</th>
+                    <th>Type</th>
+                    <th>Ages</th>
+                    <th>Capacity</th>
+                    <th>Price/Session</th>
+                    <th>Monthly</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for program in programs %}
+                <tr>
+                    <td><strong>{{ program.name }}</strong></td>
+                    <td>
+                        <span class="program-age-badge {{ 'private' if program.program_type == 'private' }}" style="font-size:0.7rem;padding:0.2rem 0.6rem;">
+                            {{ program.program_type }}
+                        </span>
+                    </td>
+                    <td>{{ program.age_min or '-' }} - {{ program.age_max or '-' }}</td>
+                    <td>{{ program.max_capacity or 'N/A' }}</td>
+                    <td>${{ '%0.0f' % (program.price_per_session / 100) }}</td>
+                    <td>${{ '%0.0f' % (program.price_monthly / 100) if program.price_monthly else 'N/A' }}</td>
+                    <td>
+                        {% if program.active %}
+                        <span class="enrollment-status confirmed">Active</span>
+                        {% else %}
+                        <span class="enrollment-status cancelled">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('admin_program_edit', program_id=program.id) }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

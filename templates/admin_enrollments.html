@@ -1,0 +1,72 @@
+{% extends "admin_base.html" %}
+{% block title %}Enrollments - Admin{% endblock %}
+
+{% block admin_content %}
+<h3 class="mb-4" style="color:var(--primary);font-weight:800;">
+    <i class="fas fa-users me-2"></i>All Enrollments
+</h3>
+
+<div class="portal-card">
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr>
+                    <th>Child</th>
+                    <th>Parent</th>
+                    <th>Contact</th>
+                    <th>Program</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in enrollments %}
+                <tr>
+                    <td>
+                        <strong>{{ e.child.name }}</strong><br>
+                        <small class="text-muted">Age {{ e.child.age }}</small>
+                    </td>
+                    <td>{{ e.child.parent.name }}</td>
+                    <td>
+                        <small class="text-muted">
+                            {{ e.child.parent.email }}<br>
+                            {{ e.child.parent.phone or '' }}
+                        </small>
+                    </td>
+                    <td>{{ e.class_session.program.name }}</td>
+                    <td>
+                        {{ e.class_session.start_time.strftime('%b %d') }}<br>
+                        <small class="text-muted">{{ e.class_session.start_time.strftime('%I:%M %p') }}</small>
+                    </td>
+                    <td>
+                        <span class="enrollment-status {{ e.status }}">{{ e.status }}</span>
+                        {% if e.waitlist_position %}
+                        <br><small class="text-warning">#{{ e.waitlist_position }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if e.payment_method == 'card' %}
+                        <i class="fas fa-credit-card me-1"></i>
+                        {% elif e.payment_method == 'venmo' %}
+                        <i class="fas fa-mobile-alt me-1" style="color:#3D95CE;"></i>
+                        {% elif e.payment_method == 'zelle' %}
+                        <i class="fas fa-university me-1" style="color:#6D1ED4;"></i>
+                        {% endif %}
+                        {% if e.payment_status == 'paid' %}
+                        <span class="enrollment-status confirmed">Paid</span>
+                        {% elif e.payment_status == 'pending_verification' %}
+                        <span class="enrollment-status waitlisted">Pending</span>
+                        {% else %}
+                        <span class="enrollment-status {{ e.payment_status }}">{{ e.payment_status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{% if e.amount_paid %}${{ '%0.2f' % (e.amount_paid / 100) }}{% else %}-{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

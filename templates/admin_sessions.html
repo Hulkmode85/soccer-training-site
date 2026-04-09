@@ -1,0 +1,228 @@
+{% extends "admin_base.html" %}
+{% block title %}Sessions - Admin{% endblock %}
+
+{% block admin_content %}
+<h3 class="mb-4" style="color:var(--primary);font-weight:800;">
+    <i class="fas fa-calendar me-2"></i>Sessions & Schedule
+</h3>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <!-- Create Single Session -->
+        <div class="portal-card">
+            <h5><i class="fas fa-plus me-2"></i>Create Session</h5>
+            <form method="POST" action="{{ url_for('admin_session_new') }}">
+                <div class="mb-3">
+                    <label class="form-label">Program</label>
+                    <select name="program_id" class="form-select" required>
+                        {% for p in programs %}
+                        <option value="{{ p.id }}">{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Title (optional)</label>
+                    <input type="text" name="title" class="form-control" placeholder="Custom session title">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Start</label>
+                        <input type="datetime-local" name="start_time" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">End</label>
+                        <input type="datetime-local" name="end_time" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Location</label>
+                    <input type="text" name="location" class="form-control" value="Main Training Field">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Season</label>
+                        <select name="season" class="form-select">
+                            <option value="spring">Spring</option>
+                            <option value="summer">Summer</option>
+                            <option value="fall">Fall</option>
+                            <option value="winter">Winter</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea name="notes" class="form-control" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn-primary-custom w-100">
+                    <i class="fas fa-plus me-2"></i>Create Session
+                </button>
+            </form>
+        </div>
+
+        <!-- Recurring Schedule -->
+        <div class="portal-card">
+            <h5><i class="fas fa-redo me-2"></i>Recurring Weekly Schedule</h5>
+            <p class="text-muted" style="font-size:0.85rem;">Set up weekly recurring slots, then generate sessions.</p>
+
+            {% if recurring %}
+            <div class="mb-3">
+                {% set days = {0:'Monday',1:'Tuesday',2:'Wednesday',3:'Thursday',4:'Friday',5:'Saturday',6:'Sunday'} %}
+                {% for rs in recurring %}
+                <div class="d-flex justify-content-between align-items-center p-2 mb-1" style="background:var(--off-white);border-radius:var(--radius-sm);">
+                    <div>
+                        <strong style="font-size:0.85rem;">{{ rs.program.name }}</strong>
+                        <small class="text-muted d-block">{{ days[rs.day_of_week] }} {{ '%02d'|format(rs.start_hour) }}:{{ '%02d'|format(rs.start_minute) }} ({{ rs.duration_minutes }}min)</small>
+                    </div>
+                    <form method="POST" action="{{ url_for('admin_recurring_delete', rs_id=rs.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-times"></i></button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+
+            <form method="POST" action="{{ url_for('admin_generate_sessions') }}" class="mb-3 p-3" style="background:#e8f5e9;border-radius:var(--radius-sm);">
+                <div class="d-flex align-items-end gap-2">
+                    <div class="flex-grow-1">
+                        <label class="form-label" style="font-size:0.8rem;">Generate for next N weeks</label>
+                        <input type="number" name="weeks" value="4" min="1" max="12" class="form-control form-control-sm">
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3">
+                        <i class="fas fa-magic me-1"></i>Generate
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('admin_recurring_new') }}">
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label">Program</label>
+                        <select name="program_id" class="form-select form-select-sm" required>
+                            {% for p in programs %}
+                            <option value="{{ p.id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Day</label>
+                        <select name="day_of_week" class="form-select form-select-sm" required>
+                            <option value="0">Mon</option>
+                            <option value="1">Tue</option>
+                            <option value="2">Wed</option>
+                            <option value="3">Thu</option>
+                            <option value="4">Fri</option>
+                            <option value="5">Sat</option>
+                            <option value="6">Sun</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Hour</label>
+                        <input type="number" name="start_hour" class="form-control form-control-sm" required min="6" max="21" value="16">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Min</label>
+                        <input type="number" name="start_minute" class="form-control form-control-sm" value="0" min="0" max="59" step="15">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Duration</label>
+                        <input type="number" name="duration_minutes" class="form-control form-control-sm" value="60" min="30" max="120" step="15">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Location</label>
+                        <input type="text" name="location" class="form-control form-control-sm" value="Main Training Field">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill w-100 mt-2">
+                    <i class="fas fa-plus me-1"></i>Add Recurring Slot
+                </button>
+            </form>
+        </div>
+
+        <!-- Block Time -->
+        <div class="portal-card">
+            <h5><i class="fas fa-ban me-2"></i>Block Time Off</h5>
+            <form method="POST" action="{{ url_for('admin_block_time') }}">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Start</label>
+                        <input type="datetime-local" name="start_time" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">End</label>
+                        <input type="datetime-local" name="end_time" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Reason</label>
+                    <input type="text" name="reason" class="form-control" placeholder="e.g. Personal day">
+                </div>
+                <button type="submit" class="btn btn-outline-secondary rounded-pill w-100">
+                    <i class="fas fa-ban me-2"></i>Block Time
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sessions List -->
+    <div class="col-lg-7">
+        <div class="portal-card">
+            <h5><i class="fas fa-list me-2"></i>All Sessions</h5>
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr><th>Program</th><th>Date/Time</th><th>Enrolled</th><th>Status</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for sess in sessions %}
+                        <tr class="{{ 'table-danger' if sess.cancelled }}">
+                            <td><strong>{{ sess.program.name }}</strong></td>
+                            <td>
+                                {{ sess.start_time.strftime('%b %d, %Y') }}<br>
+                                <small class="text-muted">{{ sess.start_time.strftime('%I:%M %p') }} - {{ sess.end_time.strftime('%I:%M %p') }}</small>
+                            </td>
+                            <td>
+                                {% if sess.program.max_capacity %}
+                                {{ sess.enrolled_count }}/{{ sess.program.max_capacity }}
+                                {% if sess.waitlist_count %}
+                                <br><small class="text-warning">+{{ sess.waitlist_count }} wl</small>
+                                {% endif %}
+                                {% else %}
+                                {{ sess.enrolled_count }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sess.cancelled %}
+                                <span class="enrollment-status cancelled">Cancelled</span>
+                                {% else %}
+                                <span class="enrollment-status confirmed">Active</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not sess.cancelled %}
+                                <div class="d-flex gap-1">
+                                    <a href="{{ url_for('admin_attendance', session_id=sess.id) }}" class="btn btn-sm btn-outline-primary rounded-pill" title="Attendance">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </a>
+                                    {% if sess.waitlist_count %}
+                                    <a href="{{ url_for('admin_waitlist', session_id=sess.id) }}" class="btn btn-sm btn-outline-warning rounded-pill" title="Waitlist">
+                                        <i class="fas fa-list-ol"></i>
+                                    </a>
+                                    {% endif %}
+                                    <form method="POST" action="{{ url_for('admin_session_cancel', session_id=sess.id) }}"
+                                          onsubmit="return confirm('Cancel this session? All enrolled students will be notified.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

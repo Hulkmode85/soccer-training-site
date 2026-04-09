@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Gallery - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-camera me-3"></i>Photo Gallery</h1>
+        <p class="lead opacity-85">Action shots from the field</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="gallery-grid">
+            {% set icons = ['futbol', 'running', 'trophy', 'users', 'medal', 'star', 'flag', 'shield-alt', 'fire'] %}
+            {% set labels = ['U6 Little Kicks Session', 'Speed & Agility Drills', 'Tournament Champions', 'U10 Team Building Day', 'Season Awards Ceremony', 'Player of the Month', 'U12 Match Day', '1-on-1 Private Training', 'U14 Elite Scrimmage'] %}
+            {% for i in range(9) %}
+            <div class="gallery-item">
+                <i class="fas fa-{{ icons[i] }}"></i>
+                <div class="overlay" style="position:absolute;bottom:0;left:0;right:0;padding:1rem;background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);font-size:0.9rem;text-align:left;opacity:1;">
+                    <strong>{{ labels[i] }}</strong><br>
+                    <small class="opacity-75">Photo coming soon</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Instagram CTA -->
+        <div class="text-center mt-5 p-5" style="background:linear-gradient(135deg, #833AB4, #FD1D1D, #F77737);border-radius:var(--radius-xl);color:white;">
+            <h3><i class="fab fa-instagram me-2"></i>See More on Instagram</h3>
+            <p class="lead opacity-90 mb-3">Follow us for daily training clips, player spotlights, and behind-the-scenes content.</p>
+            <a href="{{ instagram_url }}" target="_blank" class="btn btn-light btn-lg rounded-pill px-5" style="font-family:'Montserrat';font-weight:700;">
+                <i class="fab fa-instagram me-2"></i>@elitesocceracademy
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "admin_base.html" %}
+{% block title %}Payments - Admin{% endblock %}
+
+{% block admin_content %}
+<h3 class="mb-4" style="color:var(--primary);font-weight:800;">
+    <i class="fas fa-dollar-sign me-2"></i>Payment Management
+</h3>
+
+{% if pending %}
+<!-- Pending Verifications -->
+<div class="portal-card mb-4" style="border-left:4px solid #ffc107;">
+    <h5><i class="fas fa-exclamation-triangle text-warning me-2"></i>Pending Verification ({{ pending|length }})</h5>
+    <p class="text-muted" style="font-size:0.85rem;">These Venmo/Zelle payments need your confirmation.</p>
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr><th>Date</th><th>Parent</th><th>Description</th><th>Method</th><th>Ref ID</th><th>Amount</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for p in pending %}
+                <tr>
+                    <td>{{ p.created_at.strftime('%b %d, %Y') }}</td>
+                    <td>
+                        <strong>{{ p.parent.name }}</strong><br>
+                        <small class="text-muted">{{ p.parent.email }}</small><br>
+                        <small class="text-muted">{{ p.parent.phone or '' }}</small>
+                    </td>
+                    <td>{{ p.description }}</td>
+                    <td>
+                        {% if p.payment_method == 'venmo' %}
+                        <span style="color:#3D95CE;font-weight:700;"><i class="fas fa-mobile-alt me-1"></i>Venmo</span>
+                        {% elif p.payment_method == 'zelle' %}
+                        <span style="color:#6D1ED4;font-weight:700;"><i class="fas fa-university me-1"></i>Zelle</span>
+                        {% endif %}
+                    </td>
+                    <td><code>{{ p.transaction_ref }}</code></td>
+                    <td><strong>${{ '%0.2f' % (p.amount / 100) }}</strong></td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <form method="POST" action="{{ url_for('admin_verify_payment', payment_id=p.id) }}">
+                                <button type="submit" class="btn btn-sm btn-success rounded-pill" title="Verify">
+                                    <i class="fas fa-check me-1"></i>Verify
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin_reject_payment', payment_id=p.id) }}"
+                                  onsubmit="return confirm('Reject this payment?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" title="Reject">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- All Payments -->
+<div class="portal-card">
+    <h5><i class="fas fa-history me-2"></i>All Payments</h5>
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr><th>Date</th><th>Parent</th><th>Description</th><th>Method</th><th>Type</th><th>Amount</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for p in all_payments %}
+                <tr>
+                    <td>{{ p.created_at.strftime('%b %d, %Y') }}</td>
+                    <td>{{ p.parent.name }}</td>
+                    <td>{{ p.description }}</td>
+                    <td>
+                        {% if p.payment_method == 'card' %}
+                        <i class="fas fa-credit-card me-1"></i>Card
+                        {% elif p.payment_method == 'venmo' %}
+                        <span style="color:#3D95CE;"><i class="fas fa-mobile-alt me-1"></i>Venmo</span>
+                        {% elif p.payment_method == 'zelle' %}
+                        <span style="color:#6D1ED4;"><i class="fas fa-university me-1"></i>Zelle</span>
+                        {% endif %}
+                    </td>
+                    <td><small>{{ (p.payment_type or 'per_session')|replace('_', ' ')|title }}</small></td>
+                    <td>${{ '%0.2f' % (p.amount / 100) }}</td>
+                    <td>
+                        {% if p.status == 'paid' %}
+                        <span class="enrollment-status confirmed">Paid</span>
+                        {% elif p.status == 'pending_verification' %}
+                        <span class="enrollment-status waitlisted">Pending</span>
+                        {% elif p.status == 'rejected' %}
+                        <span class="enrollment-status cancelled">Rejected</span>
+                        {% else %}
+                        <span class="enrollment-status {{ p.status }}">{{ p.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

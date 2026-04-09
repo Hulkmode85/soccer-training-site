@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% block title %}{{ site_name }} - Youth Soccer Training{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <span class="section-tag">Now Enrolling -- Spring & Summer 2026</span>
+                <h1 class="fade-in-up">Where Young <span>Champions</span> Are Made</h1>
+                <p class="lead fade-in-up delay-1">Premier youth soccer training for ages 4-14. USSF-licensed coaching that builds technical skill, tactical intelligence, and a lifelong love for the beautiful game.</p>
+                <div class="d-flex gap-3 mt-4 flex-wrap fade-in-up delay-2">
+                    <a href="{{ url_for('programs') }}" class="btn-accent btn-lg"><i class="fas fa-futbol me-2"></i>View Programs</a>
+                    <a href="{{ url_for('calendar_view') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="far fa-calendar me-2"></i>See Schedule
+                    </a>
+                </div>
+                <div class="hero-stats fade-in-up delay-3">
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">500+</div>
+                        <div class="hero-stat-label">Players Trained</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">15+</div>
+                        <div class="hero-stat-label">Years Experience</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">4.9</div>
+                        <div class="hero-stat-label"><i class="fas fa-star"></i> Rating</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 fade-in-up delay-2">
+                <div class="hero-image-placeholder">
+                    <i class="fas fa-futbol text-white"></i>
+                    <!-- Replace with actual hero image -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Programs -->
+<section id="programs">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Our Programs</span>
+            <h2>Training Programs for Every Age</h2>
+            <p>From first-time kickers to competitive players, we have the perfect program for your child.</p>
+        </div>
+        <div class="row g-4">
+            {% for program in programs %}
+            <div class="col-lg-4 col-md-6">
+                <div class="program-card">
+                    <div class="program-card-header">
+                        <span class="program-age-badge {{ 'private' if program.program_type == 'private' }}">
+                            {% if program.program_type == 'private' %}
+                                <i class="fas fa-star me-1"></i>Private
+                            {% else %}
+                                Ages {{ program.age_min }}-{{ program.age_max }}
+                            {% endif %}
+                        </span>
+                        <h3>{{ program.name }}</h3>
+                    </div>
+                    <div class="program-card-body">
+                        <p>{{ program.description }}</p>
+                        {% if program.max_capacity and program.program_type == 'group' %}
+                        <div class="program-capacity">
+                            <i class="fas fa-users"></i>
+                            <span>Max {{ program.max_capacity }} players per session</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="program-card-footer">
+                        <div class="program-price">
+                            ${{ '%0.0f' % (program.price_per_session / 100) }}<small>/session</small>
+                        </div>
+                        <a href="{{ url_for('program_detail', slug=program.slug) }}" class="btn-program">
+                            Learn More <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- About Coach -->
+<section class="coach-section">
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mb-4 mb-lg-0">
+                <div class="coach-photo-placeholder">
+                    <i class="fas fa-user text-white"></i>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <span class="section-tag">Meet Your Coach</span>
+                <h2 class="text-white mb-3">{{ coach_name }}</h2>
+                <p class="text-light opacity-85 mb-3" style="font-size: 1.1rem; line-height: 1.8;">
+                    With over 15 years of coaching experience and a deep passion for youth development, {{ coach_name }} has trained 500+ young players across every level -- from first-time kickers to state-level ODP competitors. A former collegiate player and USSF-licensed coach, Alex brings professional-grade methodology to every session while keeping the environment positive and fun.
+                </p>
+                <p class="text-light opacity-85 mb-4" style="font-size: 1.1rem; line-height: 1.8;">
+                    "My philosophy is simple: every child can improve, every session should be fun, and the lessons learned on the pitch -- teamwork, resilience, discipline -- carry over into everything they do."
+                </p>
+                <div class="mb-4">
+                    <span class="credential-badge"><i class="fas fa-certificate"></i> USSF National C License</span>
+                    <span class="credential-badge"><i class="fas fa-certificate"></i> UEFA B License</span>
+                    <span class="credential-badge"><i class="fas fa-certificate"></i> US Soccer Grassroots</span>
+                    <span class="credential-badge"><i class="fas fa-certificate"></i> CPR/AED/First Aid</span>
+                    <span class="credential-badge"><i class="fas fa-shield-alt"></i> Background Checked</span>
+                </div>
+                <a href="{{ url_for('programs') }}" class="btn-accent"><i class="fas fa-futbol me-2"></i>Train With Me</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="bg-light-green">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">How It Works</span>
+            <h2>Getting Started Is Easy</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div style="width:80px;height:80px;border-radius:50%;background:var(--gradient-primary);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:2rem;margin-bottom:1rem;">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h4 style="color:var(--primary);">1. Choose a Program</h4>
+                <p class="text-muted">Browse our U6-U14 age-specific programs and find the perfect fit for your child's skill level and goals.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div style="width:80px;height:80px;border-radius:50%;background:var(--gradient-accent);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:2rem;margin-bottom:1rem;">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h4 style="color:var(--primary);">2. Pick a Session</h4>
+                <p class="text-muted">Select from available dates and times. See real-time availability and book your spot instantly.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div style="width:80px;height:80px;border-radius:50%;background:var(--gradient-gold);display:inline-flex;align-items:center;justify-content:center;color:var(--text-dark);font-size:2rem;margin-bottom:1rem;">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h4 style="color:var(--primary);">3. Show Up & Play</h4>
+                <p class="text-muted">Get a calendar invite, show up with cleats and a water bottle, and watch your child grow!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section>
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Parent Reviews</span>
+            <h2>What Parents Are Saying</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card">
+                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="testimonial-text">"My son went from barely kicking the ball to scoring goals in his travel league. The improvement in just one season has been incredible. Coach Alex is patient, positive, and pushes the kids to be their best without ever making it feel like pressure."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">SM</div>
+                        <div class="testimonial-meta">
+                            <strong>Sarah M.</strong>
+                            <small>Parent of Junior Stars U8 player</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card">
+                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="testimonial-text">"Both my kids (ages 5 and 9) train here and they absolutely love it. The Little Kicks program made my youngest fall in love with soccer. The sibling discount is a nice bonus too!"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">JR</div>
+                        <div class="testimonial-meta">
+                            <strong>Jennifer R.</strong>
+                            <small>Parent of 2 players</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card">
+                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="testimonial-text">"The 1-on-1 sessions helped my daughter prepare for high school tryouts. She made varsity as a freshman! Coach Alex identified exactly what she needed to work on and created a plan that got real results. Worth every penny."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">DK</div>
+                        <div class="testimonial-meta">
+                            <strong>David K.</strong>
+                            <small>Parent of Elite Youth U14 player</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Instagram Feed -->
+<section class="bg-light-green">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag"><i class="fab fa-instagram me-1"></i> Follow Us</span>
+            <h2>Action on the Field</h2>
+            <p>Follow us on Instagram for daily training highlights, tips, and player spotlights.</p>
+        </div>
+        <div class="instagram-grid">
+            {% for i in range(6) %}
+            <div class="instagram-item">
+                <div class="instagram-placeholder">
+                    <i class="fas fa-{{ ['futbol', 'running', 'trophy', 'users', 'medal', 'star'][i] }}"></i>
+                </div>
+                <div class="overlay">
+                    <i class="fab fa-instagram fa-2x"></i>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ instagram_url }}" target="_blank" class="btn-primary-custom">
+                <i class="fab fa-instagram me-2"></i>Follow @elitesocceracademy
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">FAQ</span>
+            <h2>Frequently Asked Questions</h2>
+            <p>Everything parents want to know before signing up.</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item" style="border:none;border-radius:var(--radius-md);margin-bottom:1rem;box-shadow:var(--shadow-sm);overflow:hidden;">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" style="font-family:'Montserrat';font-weight:700;color:var(--primary);">
+                                What age groups do you offer?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                We offer five age-based group programs: <strong>Little Kicks (U6)</strong> for ages 4-6, <strong>Junior Stars (U8)</strong> for ages 7-8, <strong>Skill Builders (U10)</strong> for ages 9-10, <strong>Rising Players (U12)</strong> for ages 11-12, and <strong>Elite Youth (U14)</strong> for ages 13-14. We also offer <strong>1-on-1 Private Training</strong> for any player ages 4-16.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item" style="border:none;border-radius:var(--radius-md);margin-bottom:1rem;box-shadow:var(--shadow-sm);overflow:hidden;">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" style="font-family:'Montserrat';font-weight:700;color:var(--primary);">
+                                Does my child need prior soccer experience?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                Not at all! Our Little Kicks and Junior Stars programs are designed for complete beginners. Every player is placed in the program that matches their age, and our coaches adapt each session to accommodate a range of skill levels within the group. All your child needs is a pair of cleats, shin guards, a water bottle, and a willingness to have fun.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item" style="border:none;border-radius:var(--radius-md);margin-bottom:1rem;box-shadow:var(--shadow-sm);overflow:hidden;">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" style="font-family:'Montserrat';font-weight:700;color:var(--primary);">
+                                What is your cancellation and refund policy?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                We offer a full refund for cancellations made at least 48 hours before a session. Cancellations within 48 hours receive a credit toward a future session. Monthly package holders can pause or cancel their subscription at any time with 7 days notice before the next billing cycle.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item" style="border:none;border-radius:var(--radius-md);margin-bottom:1rem;box-shadow:var(--shadow-sm);overflow:hidden;">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" style="font-family:'Montserrat';font-weight:700;color:var(--primary);">
+                                How small are the class sizes?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                We keep classes intentionally small to maximize individual attention. Little Kicks caps at 8 players, Junior Stars at 10, Skill Builders at 12, and Rising Players and Elite Youth at 14. This ensures every child gets meaningful coaching interaction and plenty of touches on the ball during each session.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item" style="border:none;border-radius:var(--radius-md);margin-bottom:1rem;box-shadow:var(--shadow-sm);overflow:hidden;">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5" style="font-family:'Montserrat';font-weight:700;color:var(--primary);">
+                                Do you offer a sibling discount?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                Yes! Families enrolling multiple children receive an automatic discount. Little Kicks offers a 15% sibling discount, and all other group programs offer 10% off for each additional sibling. The discount is applied automatically at checkout.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item" style="border:none;border-radius:var(--radius-md);margin-bottom:1rem;box-shadow:var(--shadow-sm);overflow:hidden;">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6" style="font-family:'Montserrat';font-weight:700;color:var(--primary);">
+                                What should my child bring to training?
+                            </button>
+                        </h2>
+                        <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                Players should wear comfortable athletic clothing, soccer cleats (turf or firm ground), and shin guards. Bring a filled water bottle and, if the weather calls for it, sunscreen. We provide all training equipment including balls, cones, and bibs. Optional: a positive attitude and a willingness to work hard!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item" style="border:none;border-radius:var(--radius-md);margin-bottom:1rem;box-shadow:var(--shadow-sm);overflow:hidden;">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7" style="font-family:'Montserrat';font-weight:700;color:var(--primary);">
+                                What payment methods do you accept?
+                            </button>
+                        </h2>
+                        <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                We accept credit and debit cards (processed securely through Stripe), Venmo, and Zelle. You can pay per session or choose our monthly unlimited package for the best value. All payment options are available during the booking process.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item" style="border:none;border-radius:var(--radius-md);margin-bottom:1rem;box-shadow:var(--shadow-sm);overflow:hidden;">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq8" style="font-family:'Montserrat';font-weight:700;color:var(--primary);">
+                                Do you offer summer camps?
+                            </button>
+                        </h2>
+                        <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                Yes! We run week-long intensive summer camps for all age groups from June through August. Camps include daily technical training, tactical sessions, scrimmages, and fun team-building activities. Early bird registration opens May 1st with discounted pricing. Follow us on Instagram or check back here for details.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container position-relative" style="z-index:2;">
+        <h2>Ready to Get Your Child on the Field?</h2>
+        <p class="lead opacity-85 mb-4">Spots fill up fast. Secure your child's place in our next session today.</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{{ url_for('programs') }}" class="btn-accent btn-lg"><i class="fas fa-futbol me-2"></i>Book a Session</a>
+            <a href="{{ url_for('calendar_view') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">View Full Schedule</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

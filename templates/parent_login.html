@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Parent Login - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="text-center mb-4">
+            <div style="width:70px;height:70px;border-radius:50%;background:var(--gradient-primary);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:1.8rem;margin-bottom:1rem;">
+                <i class="fas fa-futbol"></i>
+            </div>
+            <h2>Parent Portal</h2>
+            <p class="text-muted">Access your child's enrollments, schedule, and payments.</p>
+        </div>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="border-radius:var(--radius-sm) 0 0 var(--radius-sm);border:2px solid var(--light-gray);border-right:none;background:var(--off-white);">
+                        <i class="fas fa-envelope text-muted"></i>
+                    </span>
+                    <input type="email" name="email" class="form-control" required placeholder="you@email.com"
+                           style="border-radius:0 var(--radius-sm) var(--radius-sm) 0;border-left:none;">
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="border-radius:var(--radius-sm) 0 0 var(--radius-sm);border:2px solid var(--light-gray);border-right:none;background:var(--off-white);">
+                        <i class="fas fa-lock text-muted"></i>
+                    </span>
+                    <input type="password" name="password" class="form-control" required placeholder="Your password"
+                           style="border-radius:0 var(--radius-sm) var(--radius-sm) 0;border-left:none;">
+                </div>
+            </div>
+            <button type="submit" class="btn-book">
+                <i class="fas fa-sign-in-alt me-2"></i>Log In
+            </button>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top">
+            <small class="text-muted">
+                Don't have an account?
+                <a href="{{ url_for('parent_register') }}" style="color:var(--primary);font-weight:600;">Register here</a>
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}

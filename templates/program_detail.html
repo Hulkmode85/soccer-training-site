@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}{{ program.name }} - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <span class="section-tag">
+            {% if program.program_type == 'private' %}Private Training{% else %}Ages {{ program.age_min }}-{{ program.age_max }}{% endif %}
+        </span>
+        <h1>{{ program.name }}</h1>
+        <p class="lead opacity-85">{{ program.description[:100] }}...</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="portal-card">
+                    <h5><i class="fas fa-info-circle me-2"></i>About This Program</h5>
+                    <p style="font-size:1.05rem;line-height:1.8;color:var(--text-muted);">{{ program.description }}</p>
+
+                    <div class="row mt-4 g-3">
+                        <div class="col-sm-6">
+                            <div class="session-info-card">
+                                <div class="session-info-item mb-0">
+                                    <i class="fas fa-users"></i>
+                                    <div>
+                                        <strong>Class Size</strong><br>
+                                        <span class="text-muted">
+                                            {% if program.program_type == 'private' %}1-on-1 individual attention
+                                            {% else %}Max {{ program.max_capacity }} players{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="session-info-card">
+                                <div class="session-info-item mb-0">
+                                    <i class="fas fa-clock"></i>
+                                    <div>
+                                        <strong>Duration</strong><br>
+                                        <span class="text-muted">{{ '45' if program.program_type == 'private' else '60' }} minutes per session</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="session-info-card">
+                                <div class="session-info-item mb-0">
+                                    <i class="fas fa-child"></i>
+                                    <div>
+                                        <strong>Age Range</strong><br>
+                                        <span class="text-muted">{{ program.age_min }} - {{ program.age_max }} years old</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="session-info-card">
+                                <div class="session-info-item mb-0">
+                                    <i class="fas fa-percentage"></i>
+                                    <div>
+                                        <strong>Sibling Discount</strong><br>
+                                        <span class="text-muted">{{ program.sibling_discount_pct }}% off for siblings</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Sessions -->
+                <div class="portal-card">
+                    <h5><i class="fas fa-calendar me-2"></i>Upcoming Sessions</h5>
+                    {% if sessions %}
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Location</th>
+                                    <th>Availability</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sess in sessions %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ sess.start_time.strftime('%a, %b %d') }}</strong><br>
+                                        <small class="text-muted">{{ sess.start_time.strftime('%I:%M %p') }} - {{ sess.end_time.strftime('%I:%M %p') }}</small>
+                                    </td>
+                                    <td><i class="fas fa-map-marker-alt text-success me-1"></i>{{ sess.location }}</td>
+                                    <td>
+                                        {% if program.max_capacity %}
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="{% if sess.is_full %}text-danger{% elif sess.enrolled_count >= program.max_capacity * 0.8 %}text-warning{% else %}text-success{% endif %}">
+                                                {{ sess.enrolled_count }}/{{ program.max_capacity }}
+                                            </span>
+                                            <div class="capacity-bar" style="width:80px;">
+                                                {% set pct = (sess.enrolled_count / program.max_capacity * 100) if program.max_capacity else 0 %}
+                                                <div class="capacity-bar-fill {% if pct >= 100 %}full{% elif pct >= 80 %}almost-full{% endif %}" style="width:{{ pct }}%"></div>
+                                            </div>
+                                        </div>
+                                        {% if sess.is_full %}
+                                        <small class="text-danger">Full - Waitlist available</small>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="text-success">Available</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('book_session', session_id=sess.id) }}" class="btn btn-sm btn-primary-custom">
+                                            {% if sess.is_full %}Join Waitlist{% else %}Book Now{% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-calendar-times fa-3x mb-3 opacity-25"></i>
+                        <p>No upcoming sessions scheduled yet. Check back soon!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="booking-card sticky-top" style="top:100px;">
+                    <div class="booking-card-header">
+                        <h4 class="mb-0"><i class="fas fa-tag me-2"></i>Pricing</h4>
+                    </div>
+                    <div class="booking-card-body">
+                        <div class="text-center mb-3">
+                            <div class="program-price" style="font-size:2rem;">
+                                ${{ '%0.0f' % (program.price_per_session / 100) }}
+                            </div>
+                            <small class="text-muted">per session</small>
+                        </div>
+                        {% if program.price_monthly %}
+                        <div class="text-center mb-3 p-3" style="background:var(--off-white);border-radius:var(--radius-md);">
+                            <strong style="color:var(--primary);">Monthly Unlimited</strong><br>
+                            <span class="program-price" style="font-size:1.5rem;">${{ '%0.0f' % (program.price_monthly / 100) }}</span><small class="text-muted">/month</small><br>
+                            <small class="text-success"><i class="fas fa-check me-1"></i>Best value for regular players</small>
+                        </div>
+                        {% endif %}
+                        {% if program.sibling_discount_pct %}
+                        <div class="text-center mb-3 p-2" style="background:#fff3cd;border-radius:var(--radius-sm);">
+                            <small><i class="fas fa-users me-1"></i>{{ program.sibling_discount_pct }}% sibling discount applied automatically</small>
+                        </div>
+                        {% endif %}
+                        {% if sessions %}
+                        <a href="{{ url_for('book_session', session_id=sessions[0].id) }}" class="btn-book">
+                            <i class="fas fa-futbol me-2"></i>Book Next Available
+                        </a>
+                        {% endif %}
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('calendar_view') }}" class="text-muted"><small>View all sessions on calendar</small></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

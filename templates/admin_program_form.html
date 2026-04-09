@@ -1,0 +1,64 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ 'Edit' if program else 'New' }} Program - Admin{% endblock %}
+
+{% block admin_content %}
+<h3 class="mb-4" style="color:var(--primary);font-weight:800;">
+    <i class="fas fa-futbol me-2"></i>{{ 'Edit' if program else 'New' }} Program
+</h3>
+
+<div class="portal-card" style="max-width:700px;">
+    <form method="POST">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label">Program Name</label>
+                <input type="text" name="name" class="form-control" required value="{{ program.name if program else '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Slug</label>
+                <input type="text" name="slug" class="form-control" required value="{{ program.slug if program else '' }}" placeholder="e.g. little-kicks">
+            </div>
+            <div class="col-12">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="3">{{ program.description if program else '' }}</textarea>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Type</label>
+                <select name="program_type" class="form-select">
+                    <option value="group" {{ 'selected' if program and program.program_type == 'group' }}>Group</option>
+                    <option value="private" {{ 'selected' if program and program.program_type == 'private' }}>Private</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Min Age</label>
+                <input type="number" name="age_min" class="form-control" value="{{ program.age_min if program and program.age_min else '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Max Age</label>
+                <input type="number" name="age_max" class="form-control" value="{{ program.age_max if program and program.age_max else '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Max Capacity</label>
+                <input type="number" name="max_capacity" class="form-control" value="{{ program.max_capacity if program and program.max_capacity else '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Price/Session ($)</label>
+                <input type="number" name="price_per_session" class="form-control" step="0.01" value="{{ '%0.2f' % (program.price_per_session / 100) if program and program.price_per_session else '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Monthly Price ($)</label>
+                <input type="number" name="price_monthly" class="form-control" step="0.01" value="{{ '%0.2f' % (program.price_monthly / 100) if program and program.price_monthly else '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Sibling Discount %</label>
+                <input type="number" name="sibling_discount_pct" class="form-control" value="{{ program.sibling_discount_pct if program else 10 }}">
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn-primary-custom">
+                <i class="fas fa-save me-2"></i>{{ 'Update' if program else 'Create' }} Program
+            </button>
+            <a href="{{ url_for('admin_programs') }}" class="btn-outline-custom">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

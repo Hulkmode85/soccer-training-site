@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}{{ method|title }} Payment - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Pay with {{ method|title }}</h1>
+        <p class="lead opacity-85">{{ enrollment.class_session.program.name }} - {{ enrollment.child.name }}</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="booking-card">
+                    <div class="booking-card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1">{{ enrollment.class_session.program.name }}</h4>
+                                <span class="opacity-85">
+                                    <i class="far fa-calendar me-1"></i>{{ enrollment.class_session.start_time.strftime('%b %d, %Y') }}
+                                    <span class="mx-2">|</span>
+                                    <i class="fas fa-child me-1"></i>{{ enrollment.child.name }}
+                                </span>
+                            </div>
+                            <div class="text-end">
+                                <div style="font-size:1.8rem;font-weight:800;">${{ '%0.2f' % (price / 100) }}</div>
+                                <small class="opacity-75">{{ enrollment.payment_type|replace('_', ' ')|title }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="booking-card-body">
+                        {% if method == 'venmo' %}
+                        <!-- Venmo Instructions -->
+                        <div class="payment-instructions p-4 mb-4" style="background:linear-gradient(135deg, #e3f2fd, #f3e5f5);border-radius:var(--radius-md);border-left:4px solid #3D95CE;">
+                            <h5 style="color:#3D95CE;font-weight:700;"><i class="fas fa-mobile-alt me-2"></i>Venmo Payment Instructions</h5>
+                            <ol class="mt-3 mb-0" style="line-height:2;">
+                                <li>Open the <strong>Venmo app</strong> on your phone</li>
+                                <li>Send <strong>${{ '%0.2f' % (price / 100) }}</strong> to <strong class="text-primary">{{ venmo_handle }}</strong></li>
+                                <li>In the note, write: <strong>{{ enrollment.child.name }} - {{ enrollment.class_session.program.name }}</strong></li>
+                                <li>Copy the <strong>transaction ID</strong> from your Venmo confirmation</li>
+                                <li>Paste it below and submit</li>
+                            </ol>
+                        </div>
+
+                        <div class="text-center mb-4 p-3" style="background:var(--off-white);border-radius:var(--radius-md);">
+                            <div style="font-family:'Montserrat';font-weight:800;font-size:1.1rem;color:var(--primary);">
+                                Send to: {{ venmo_handle }}
+                            </div>
+                            <div style="font-size:1.5rem;font-weight:800;color:#3D95CE;margin-top:0.25rem;">
+                                ${{ '%0.2f' % (price / 100) }}
+                            </div>
+                        </div>
+
+                        {% elif method == 'zelle' %}
+                        <!-- Zelle Instructions -->
+                        <div class="payment-instructions p-4 mb-4" style="background:linear-gradient(135deg, #f3e5f5, #ede7f6);border-radius:var(--radius-md);border-left:4px solid #6D1ED4;">
+                            <h5 style="color:#6D1ED4;font-weight:700;"><i class="fas fa-university me-2"></i>Zelle Payment Instructions</h5>
+                            <ol class="mt-3 mb-0" style="line-height:2;">
+                                <li>Open your <strong>banking app</strong> or Zelle app</li>
+                                <li>Send <strong>${{ '%0.2f' % (price / 100) }}</strong> to:</li>
+                                <ul class="mb-2">
+                                    <li>Email: <strong class="text-primary">{{ zelle_email }}</strong></li>
+                                    <li>Or phone: <strong class="text-primary">{{ zelle_phone }}</strong></li>
+                                </ul>
+                                <li>In the memo, write: <strong>{{ enrollment.child.name }} - {{ enrollment.class_session.program.name }}</strong></li>
+                                <li>Enter the <strong>confirmation number</strong> from your bank below</li>
+                            </ol>
+                        </div>
+
+                        <div class="text-center mb-4 p-3" style="background:var(--off-white);border-radius:var(--radius-md);">
+                            <div style="font-family:'Montserrat';font-weight:800;font-size:1rem;color:var(--primary);">
+                                Send to: {{ zelle_email }}
+                            </div>
+                            <div style="font-size:0.85rem;color:var(--text-muted);">or {{ zelle_phone }}</div>
+                            <div style="font-size:1.5rem;font-weight:800;color:#6D1ED4;margin-top:0.25rem;">
+                                ${{ '%0.2f' % (price / 100) }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Confirmation form -->
+                        <form method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    {% if method == 'venmo' %}
+                                    Venmo Transaction ID *
+                                    {% else %}
+                                    Zelle Confirmation Number *
+                                    {% endif %}
+                                </label>
+                                <input type="text" name="transaction_ref" class="form-control" required
+                                       placeholder="{% if method == 'venmo' %}e.g. 3847291028374{% else %}e.g. REF-123456789{% endif %}">
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    This helps the coach verify your payment. You can find this in your {{ method|title }} confirmation.
+                                </small>
+                            </div>
+
+                            <div class="p-3 mb-3" style="background:#fff3cd;border-radius:var(--radius-sm);">
+                                <small>
+                                    <i class="fas fa-clock me-1 text-warning"></i>
+                                    <strong>Note:</strong> Your booking will show as "Pending Verification" until the coach confirms receipt of payment.
+                                    This is typically done within a few hours.
+                                </small>
+                            </div>
+
+                            <button type="submit" class="btn-book">
+                                <i class="fas fa-check-circle me-2"></i>Submit Payment Confirmation
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

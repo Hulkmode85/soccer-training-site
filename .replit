@@ -1,0 +1,13 @@
+run = "python app.py"
+entrypoint = "app.py"
+modules = ["python-3.11"]
+
+[nix]
+channel = "stable-23_11"
+
+[deployment]
+run = ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT app:app"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

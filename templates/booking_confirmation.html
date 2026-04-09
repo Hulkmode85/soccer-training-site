@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Booking Confirmed - {{ site_name }}{% endblock %}
+
+{% block content %}
+<section style="padding-top:8rem;">
+    <div class="container">
+        <div class="confirmation-card">
+            {% if enrollment.status == 'waitlisted' %}
+            <div class="confirmation-icon waitlist">
+                <i class="fas fa-clock"></i>
+            </div>
+            <h2 style="color:var(--primary);">Added to Waitlist</h2>
+            <p class="text-muted mb-1">{{ enrollment.child.name }} is on the waitlist for:</p>
+            <h4 style="color:var(--primary-light);">{{ enrollment.class_session.program.name }}</h4>
+            <p class="text-muted">
+                <i class="far fa-calendar me-1"></i>{{ enrollment.class_session.start_time.strftime('%A, %B %d, %Y at %I:%M %p') }}
+            </p>
+            <div class="p-3 my-3" style="background:#fff3cd;border-radius:var(--radius-md);">
+                <strong>Waitlist Position: #{{ enrollment.waitlist_position }}</strong><br>
+                <small>We'll notify you immediately when a spot opens up.</small>
+            </div>
+            {% else %}
+            <div class="confirmation-icon success">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 style="color:var(--primary);">Booking Confirmed!</h2>
+            <p class="text-muted mb-1">{{ enrollment.child.name }} is registered for:</p>
+            <h4 style="color:var(--primary-light);">{{ enrollment.class_session.program.name }}</h4>
+            <p class="text-muted">
+                <i class="far fa-calendar me-1"></i>{{ enrollment.class_session.start_time.strftime('%A, %B %d, %Y') }}<br>
+                <i class="far fa-clock me-1"></i>{{ enrollment.class_session.start_time.strftime('%I:%M %p') }} - {{ enrollment.class_session.end_time.strftime('%I:%M %p') }}<br>
+                <i class="fas fa-map-marker-alt me-1"></i>{{ enrollment.class_session.location }}
+            </p>
+
+            {% if enrollment.payment_status == 'paid' %}
+            <div class="p-3 my-3" style="background:#d4edda;border-radius:var(--radius-md);">
+                <i class="fas fa-check-circle text-success me-1"></i>
+                <strong>Payment Confirmed</strong>
+                {% if enrollment.amount_paid %}
+                 - ${{ '%0.2f' % (enrollment.amount_paid / 100) }}
+                {% endif %}
+                via {{ enrollment.payment_method|title }}
+            </div>
+            {% elif enrollment.payment_status == 'pending_verification' %}
+            <div class="p-3 my-3" style="background:#fff3cd;border-radius:var(--radius-md);">
+                <i class="fas fa-clock text-warning me-1"></i>
+                <strong>Payment Pending Verification</strong><br>
+                <small>Your {{ enrollment.payment_method|title }} payment is being reviewed by the coach. You will be notified once confirmed.</small>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
+                {% if enrollment.status == 'confirmed' %}
+                <a href="{{ url_for('download_ics', enrollment_id=enrollment.id) }}" class="btn-primary-custom">
+                    <i class="fas fa-calendar-plus me-2"></i>Add to Calendar
+                </a>
+                {% endif %}
+                {% if session.get('parent_id') %}
+                <a href="{{ url_for('parent_dashboard') }}" class="btn-outline-custom">
+                    <i class="fas fa-user me-2"></i>My Dashboard
+                </a>
+                {% else %}
+                <a href="{{ url_for('parent_register') }}" class="btn-outline-custom">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </a>
+                {% endif %}
+                <a href="{{ url_for('calendar_view') }}" class="btn-outline-custom">
+                    <i class="fas fa-calendar me-2"></i>View Schedule
+                </a>
+                <a href="{{ url_for('programs') }}" class="btn-outline-custom">
+                    <i class="fas fa-futbol me-2"></i>Book Another
+                </a>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+                <small class="text-muted">
+                    <strong>What to bring:</strong> Cleats, shin guards, water bottle, positive attitude!<br>
+                    <strong>Cancellation policy:</strong> Full refund with 48-hour notice.
+                    {% if not session.get('parent_id') %}
+                    <a href="{{ url_for('parent_register') }}">Create an account</a> to manage bookings and message the coach.
+                    {% else %}
+                    <a href="{{ url_for('parent_dashboard') }}">Go to your dashboard</a> to manage bookings.
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

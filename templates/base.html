@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-futbol me-2"></i>{{ site_name }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('programs') }}">Programs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('calendar_view') }}">Schedule</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('gallery') }}">Gallery</a></li>
+                    <li class="nav-item">
+                        {% if session.get('parent_id') %}
+                        <a class="nav-link" href="{{ url_for('parent_dashboard') }}">
+                            <i class="fas fa-user me-1"></i>My Account
+                            {% if unread_parent_messages %}
+                            <span class="badge bg-danger rounded-pill ms-1">{{ unread_parent_messages }}</span>
+                            {% endif %}
+                        </a>
+                        {% else %}
+                        <a class="nav-link" href="{{ url_for('parent_login') }}"><i class="fas fa-user me-1"></i>Parent Login</a>
+                        {% endif %}
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-accent nav-cta ms-lg-3" href="{{ url_for('programs') }}">Book Now</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container" style="position:fixed;top:80px;right:20px;z-index:9999;max-width:400px;">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5><i class="fas fa-futbol me-2"></i>{{ site_name }}</h5>
+                    <p class="text-light opacity-75">Developing young soccer players through expert coaching, positive reinforcement, and a love for the beautiful game.</p>
+                    <div class="social-links">
+                        <a href="{{ instagram_url }}" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ url_for('programs') }}">Programs</a></li>
+                        <li><a href="{{ url_for('calendar_view') }}">Schedule</a></li>
+                        <li><a href="{{ url_for('gallery') }}">Gallery</a></li>
+                        <li><a href="{{ url_for('parent_login') }}">Parent Portal</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-4 mb-4">
+                    <h6>Programs</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ url_for('program_detail', slug='little-kicks') }}">Little Kicks U6</a></li>
+                        <li><a href="{{ url_for('program_detail', slug='junior-stars') }}">Junior Stars U8</a></li>
+                        <li><a href="{{ url_for('program_detail', slug='skill-builders') }}">Skill Builders U10</a></li>
+                        <li><a href="{{ url_for('program_detail', slug='rising-players') }}">Rising Players U12</a></li>
+                        <li><a href="{{ url_for('program_detail', slug='elite-youth') }}">Elite Youth U14</a></li>
+                        <li><a href="{{ url_for('program_detail', slug='one-on-one') }}">1-on-1 Private Training</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-4 mb-4">
+                    <h6>Contact</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><i class="fas fa-phone me-2"></i>(555) 123-4567</li>
+                        <li><i class="fas fa-envelope me-2"></i>info@elitesocceracademy.com</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Los Angeles, CA</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-light opacity-25">
+            <div class="text-center py-2 opacity-75">
+                <small>&copy; {{ current_year }} {{ site_name }}. All rights reserved.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('mainNav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+        // Auto-dismiss flash messages
+        setTimeout(() => {
+            document.querySelectorAll('.flash-container .alert').forEach(el => {
+                new bootstrap.Alert(el).close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

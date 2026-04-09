@@ -1,0 +1,52 @@
+{% extends "admin_base.html" %}
+{% block title %}Reports - Admin{% endblock %}
+
+{% block admin_content %}
+<h3 class="mb-4" style="color:var(--primary);font-weight:800;">
+    <i class="fas fa-chart-bar me-2"></i>Reports
+</h3>
+
+<div class="row g-4">
+    <!-- Revenue by month -->
+    <div class="col-lg-6">
+        <div class="portal-card">
+            <h5><i class="fas fa-dollar-sign me-2"></i>Revenue by Month</h5>
+            {% if monthly %}
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead><tr><th>Month</th><th>Revenue</th></tr></thead>
+                    <tbody>
+                        {% for month, amount in monthly.items()|sort(reverse=true) %}
+                        <tr>
+                            <td>{{ month }}</td>
+                            <td><strong>${{ '%0.2f' % (amount / 100) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-3">No revenue data yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Enrollment by program -->
+    <div class="col-lg-6">
+        <div class="portal-card">
+            <h5><i class="fas fa-futbol me-2"></i>Enrollment by Program</h5>
+            {% for stat in program_stats %}
+            <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
+                <span><strong>{{ stat.name }}</strong></span>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="capacity-bar" style="width:120px;">
+                        <div class="capacity-bar-fill" style="width:{{ (stat.enrolled * 5) if stat.enrolled else 0 }}%"></div>
+                    </div>
+                    <span class="fw-bold" style="color:var(--primary);min-width:30px;text-align:right;">{{ stat.enrolled }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

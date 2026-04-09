@@ -1,0 +1,155 @@
+{% extends "admin_base.html" %}
+{% block title %}Dashboard - Admin{% endblock %}
+
+{% block admin_content %}
+<h3 class="mb-4" style="color:var(--primary);font-weight:800;">
+    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+</h3>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:linear-gradient(135deg,#d4edda,#c3e6cb);color:var(--primary);">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-number">{{ total_enrolled }}</div>
+            <div class="stat-label">Active Enrollments</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:linear-gradient(135deg,#fff3cd,#ffeaa7);color:#856404;">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-number">{{ total_waitlisted }}</div>
+            <div class="stat-label">Waitlisted</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:linear-gradient(135deg,#cce5ff,#b8daff);color:#004085;">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number">{{ total_parents }}</div>
+            <div class="stat-label">Registered Parents</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--gradient-gold);color:var(--text-dark);">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-number">${{ '%0.0f' % (total_revenue / 100) }}</div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
+    </div>
+</div>
+
+<!-- Action alerts -->
+{% if pending_payments or unread_messages %}
+<div class="row g-3 mb-4">
+    {% if pending_payments %}
+    <div class="col-md-6">
+        <div class="p-3" style="background:#fff3cd;border-radius:var(--radius-md);border-left:4px solid #ffc107;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong><i class="fas fa-exclamation-triangle text-warning me-2"></i>{{ pending_payments }} Pending Payment{{ 's' if pending_payments != 1 }}</strong>
+                    <small class="text-muted d-block">Venmo/Zelle payments awaiting verification</small>
+                </div>
+                <a href="{{ url_for('admin_payments') }}" class="btn btn-sm btn-warning rounded-pill">Review</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if unread_messages %}
+    <div class="col-md-6">
+        <div class="p-3" style="background:#cce5ff;border-radius:var(--radius-md);border-left:4px solid #0d6efd;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong><i class="fas fa-envelope text-primary me-2"></i>{{ unread_messages }} Unread Message{{ 's' if unread_messages != 1 }}</strong>
+                    <small class="text-muted d-block">New messages from parents</small>
+                </div>
+                <a href="{{ url_for('admin_message') }}" class="btn btn-sm btn-primary rounded-pill">View</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Upcoming Sessions -->
+    <div class="col-lg-7">
+        <div class="portal-card">
+            <h5><i class="fas fa-calendar me-2"></i>Upcoming Sessions</h5>
+            {% if upcoming_sessions %}
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead><tr><th>Session</th><th>Date/Time</th><th>Enrolled</th><th></th></tr></thead>
+                    <tbody>
+                        {% for sess in upcoming_sessions %}
+                        <tr>
+                            <td><strong>{{ sess.program.name }}</strong></td>
+                            <td>
+                                {{ sess.start_time.strftime('%b %d') }}<br>
+                                <small class="text-muted">{{ sess.start_time.strftime('%I:%M %p') }}</small>
+                            </td>
+                            <td>
+                                {% if sess.program.max_capacity %}
+                                <span class="{% if sess.is_full %}text-danger fw-bold{% endif %}">
+                                    {{ sess.enrolled_count }}/{{ sess.program.max_capacity }}
+                                </span>
+                                {% if sess.waitlist_count %}
+                                <br><small class="text-warning">+{{ sess.waitlist_count }} waitlisted</small>
+                                {% endif %}
+                                {% else %}
+                                {{ sess.enrolled_count }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_attendance', session_id=sess.id) }}" class="btn btn-sm btn-outline-primary rounded-pill" title="Attendance">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </a>
+                                {% if sess.waitlist_count %}
+                                <a href="{{ url_for('admin_waitlist', session_id=sess.id) }}" class="btn btn-sm btn-outline-warning rounded-pill" title="Waitlist">
+                                    <i class="fas fa-list-ol"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-3">No upcoming sessions.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Enrollments -->
+    <div class="col-lg-5">
+        <div class="portal-card">
+            <h5><i class="fas fa-user-plus me-2"></i>Recent Enrollments</h5>
+            {% for e in recent_enrollments %}
+            <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
+                <div>
+                    <strong style="font-size:0.9rem;">{{ e.child.name }}</strong>
+                    <small class="text-muted d-block">{{ e.class_session.program.name }}</small>
+                    <small class="text-muted">{{ e.child.parent.name }} | {{ e.child.parent.email }}</small>
+                </div>
+                <div class="text-end">
+                    <span class="enrollment-status {{ e.status }}">{{ e.status }}</span>
+                    {% if e.payment_status == 'pending_verification' %}
+                    <br><small class="text-warning"><i class="fas fa-clock"></i> {{ e.payment_method }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-3">No enrollments yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}Book Session - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Book Your Spot</h1>
+        <p class="lead opacity-85">{{ session.program.name }} - {{ session.start_time.strftime('%A, %B %d, %Y') }}</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="booking-card">
+                    <div class="booking-card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1">{{ session.program.name }}</h4>
+                                <span class="opacity-85">
+                                    <i class="far fa-calendar me-1"></i>{{ session.start_time.strftime('%A, %B %d, %Y') }}
+                                    <span class="mx-2">|</span>
+                                    <i class="far fa-clock me-1"></i>{{ session.start_time.strftime('%I:%M %p') }} - {{ session.end_time.strftime('%I:%M %p') }}
+                                </span>
+                            </div>
+                            <div class="text-end">
+                                <div style="font-size:1.5rem;font-weight:800;">${{ '%0.0f' % (session.program.price_per_session / 100) }}</div>
+                                <small class="opacity-75">per session</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="booking-card-body">
+                        <!-- Session info -->
+                        <div class="session-info-card">
+                            <div class="session-info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{ session.location }}</span>
+                            </div>
+                            {% if session.program.max_capacity %}
+                            <div class="session-info-item">
+                                <i class="fas fa-users"></i>
+                                <span>{{ session.enrolled_count }} / {{ session.program.max_capacity }} enrolled</span>
+                            </div>
+                            <div class="capacity-bar">
+                                {% set pct = (session.enrolled_count / session.program.max_capacity * 100) %}
+                                <div class="capacity-bar-fill {% if pct >= 100 %}full{% elif pct >= 80 %}almost-full{% endif %}" style="width:{{ pct }}%"></div>
+                            </div>
+                            {% if session.is_full %}
+                            <div class="mt-2">
+                                <span class="enrollment-status waitlisted"><i class="fas fa-clock me-1"></i>Class Full - Joining Waitlist</span>
+                                <p class="text-muted mt-1 mb-0"><small>You'll be notified when a spot opens up. Waitlist position: #{{ session.waitlist_count + 1 }}</small></p>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                            {% if session.program.age_min %}
+                            <div class="session-info-item">
+                                <i class="fas fa-child"></i>
+                                <span>Ages {{ session.program.age_min }} - {{ session.program.age_max }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Booking form -->
+                        <form method="POST" class="mt-4" id="bookingForm">
+                            <h5 style="color:var(--primary);font-weight:700;margin-bottom:1.5rem;">
+                                <i class="fas fa-user-friends me-2"></i>Player & Parent Information
+                            </h5>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Child's Full Name *</label>
+                                    <input type="text" name="child_name" class="form-control" required placeholder="Enter child's name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Child's Age *</label>
+                                    <input type="number" name="child_age" class="form-control" required
+                                           min="{{ session.program.age_min or 4 }}"
+                                           max="{{ session.program.age_max or 16 }}"
+                                           placeholder="Age">
+                                    {% if session.program.age_min %}
+                                    <small class="text-muted">Ages {{ session.program.age_min }}-{{ session.program.age_max }} only</small>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12"><hr class="my-2"></div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Parent/Guardian Name *</label>
+                                    <input type="text" name="parent_name" class="form-control" required
+                                           placeholder="Your full name"
+                                           value="{{ parent.name if parent else '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email Address *</label>
+                                    <input type="email" name="parent_email" class="form-control" required
+                                           placeholder="you@email.com"
+                                           value="{{ parent.email if parent else '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" name="parent_phone" class="form-control"
+                                           placeholder="(555) 123-4567"
+                                           value="{{ parent.phone if parent else '' }}">
+                                </div>
+                            </div>
+
+                            {% if not session.is_full %}
+                            <!-- Payment Type -->
+                            {% if session.program.price_monthly %}
+                            <div class="mt-4">
+                                <h5 style="color:var(--primary);font-weight:700;margin-bottom:1rem;">
+                                    <i class="fas fa-tag me-2"></i>Payment Plan
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="payment-type-option selected" data-type="per_session">
+                                            <input type="radio" name="payment_type" value="per_session" checked class="d-none" id="pt_session">
+                                            <label for="pt_session" class="d-block" style="cursor:pointer;">
+                                                <strong>Per Session</strong>
+                                                <div class="mt-1" style="font-size:1.3rem;font-weight:800;color:var(--primary);">
+                                                    ${{ '%0.0f' % (session.program.price_per_session / 100) }}
+                                                </div>
+                                                <small class="text-muted">Pay as you go</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="payment-type-option" data-type="monthly">
+                                            <input type="radio" name="payment_type" value="monthly" class="d-none" id="pt_monthly">
+                                            <label for="pt_monthly" class="d-block" style="cursor:pointer;">
+                                                <strong>Monthly Package</strong>
+                                                <div class="mt-1" style="font-size:1.3rem;font-weight:800;color:var(--primary);">
+                                                    ${{ '%0.0f' % (session.program.price_monthly / 100) }}<small style="font-size:0.7rem;">/mo</small>
+                                                </div>
+                                                <small class="text-success"><i class="fas fa-check me-1"></i>Best value</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <input type="hidden" name="payment_type" value="per_session">
+                            {% endif %}
+
+                            <!-- Payment Method -->
+                            <div class="mt-4">
+                                <h5 style="color:var(--primary);font-weight:700;margin-bottom:1rem;">
+                                    <i class="fas fa-credit-card me-2"></i>Payment Method
+                                </h5>
+                                <div class="payment-methods">
+                                    <div class="payment-method-card selected" data-method="card">
+                                        <input type="radio" name="payment_method" value="card" checked class="d-none" id="pm_card">
+                                        <label for="pm_card" style="cursor:pointer;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="fas fa-credit-card" style="font-size:1.2rem;color:var(--primary);"></i>
+                                                <div>
+                                                    <strong>Credit / Debit Card</strong>
+                                                    <small class="d-block text-muted">Instant confirmation via Stripe</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="payment-method-card" data-method="venmo">
+                                        <input type="radio" name="payment_method" value="venmo" class="d-none" id="pm_venmo">
+                                        <label for="pm_venmo" style="cursor:pointer;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="fas fa-mobile-alt" style="font-size:1.2rem;color:#3D95CE;"></i>
+                                                <div>
+                                                    <strong>Venmo</strong>
+                                                    <small class="d-block text-muted">Pending until coach verifies</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="payment-method-card" data-method="zelle">
+                                        <input type="radio" name="payment_method" value="zelle" class="d-none" id="pm_zelle">
+                                        <label for="pm_zelle" style="cursor:pointer;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="fas fa-university" style="font-size:1.2rem;color:#6D1ED4;"></i>
+                                                <div>
+                                                    <strong>Zelle</strong>
+                                                    <small class="d-block text-muted">Pending until coach verifies</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if session.program.sibling_discount_pct %}
+                            <div class="mt-3 p-3" style="background:#e8f5e9;border-radius:var(--radius-sm);">
+                                <small><i class="fas fa-tag text-success me-1"></i>
+                                    <strong>Sibling discount:</strong> {{ session.program.sibling_discount_pct }}% off when enrolling multiple children in the same session.
+                                </small>
+                            </div>
+                            {% endif %}
+
+                            <div class="mt-4">
+                                <p class="text-muted"><small>
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    By booking, you agree to our cancellation policy (48-hour notice required for full refund).
+                                    Card payments are securely processed by Stripe. Venmo/Zelle payments are confirmed by the coach.
+                                </small></p>
+                            </div>
+
+                            <button type="submit" class="btn-book mt-2">
+                                {% if session.is_full %}
+                                    <i class="fas fa-clock me-2"></i>Join Waitlist
+                                {% else %}
+                                    <i class="fas fa-lock me-2"></i>Continue to Payment
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Payment type toggle
+document.querySelectorAll('.payment-type-option').forEach(function(opt) {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('.payment-type-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input[type="radio"]').checked = true;
+    });
+});
+
+// Payment method toggle
+document.querySelectorAll('.payment-method-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+        document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input[type="radio"]').checked = true;
+    });
+});
+</script>
+{% endblock %}

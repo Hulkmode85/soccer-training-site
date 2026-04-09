@@ -1,0 +1,87 @@
+{% extends "admin_base.html" %}
+{% block title %}Broadcast - Admin{% endblock %}
+
+{% block admin_content %}
+<h3 class="mb-4" style="color:var(--primary);font-weight:800;">
+    <i class="fas fa-bullhorn me-2"></i>Broadcast Message
+</h3>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="portal-card">
+            <h5><i class="fas fa-paper-plane me-2"></i>Send to All Parents</h5>
+            <p class="text-muted" style="font-size:0.9rem;">
+                Send an announcement to all parents or a specific program group.
+                Great for schedule changes, rain delays, or general updates.
+            </p>
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Audience</label>
+                    <select name="target" class="form-select">
+                        <option value="all">All Parents</option>
+                        {% for p in programs %}
+                        <option value="program-{{ p.slug }}">{{ p.name }} parents only</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Subject</label>
+                    <input type="text" name="subject" class="form-control" placeholder="e.g. Rain Delay - Saturday class moved to Sunday" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <textarea name="body" class="form-control" rows="5" required
+                              placeholder="Type your announcement here. This will appear in each parent's inbox."></textarea>
+                </div>
+
+                <div class="p-3 mb-3" style="background:#fff3cd;border-radius:var(--radius-sm);">
+                    <small>
+                        <i class="fas fa-info-circle text-warning me-1"></i>
+                        This message will be sent to all parents in the selected group. They will see it in their Messages inbox.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn-primary-custom" onclick="return confirm('Send this broadcast to all selected parents?');">
+                    <i class="fas fa-bullhorn me-2"></i>Send Broadcast
+                </button>
+            </form>
+        </div>
+
+        <!-- Example templates -->
+        <div class="portal-card">
+            <h5><i class="fas fa-lightbulb me-2"></i>Quick Templates</h5>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <div class="p-3 template-card" style="background:var(--off-white);border-radius:var(--radius-sm);cursor:pointer;"
+                         onclick="document.querySelector('input[name=subject]').value='Weather Delay';document.querySelector('textarea[name=body]').value='Due to weather conditions, today\'s session has been postponed. We will update you with the rescheduled time shortly. Stay safe!';">
+                        <strong style="font-size:0.85rem;color:var(--primary);"><i class="fas fa-cloud-rain me-1"></i>Weather Delay</strong>
+                        <small class="text-muted d-block">Session postponed due to weather</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 template-card" style="background:var(--off-white);border-radius:var(--radius-sm);cursor:pointer;"
+                         onclick="document.querySelector('input[name=subject]').value='Schedule Change';document.querySelector('textarea[name=body]').value='Please note the following schedule change for this week. Check the calendar on our website for updated session times.';">
+                        <strong style="font-size:0.85rem;color:var(--primary);"><i class="fas fa-calendar-alt me-1"></i>Schedule Change</strong>
+                        <small class="text-muted d-block">Updated session time/location</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 template-card" style="background:var(--off-white);border-radius:var(--radius-sm);cursor:pointer;"
+                         onclick="document.querySelector('input[name=subject]').value='Reminder';document.querySelector('textarea[name=body]').value='Friendly reminder: please make sure your child brings water, cleats, and shin guards to every session. See you on the field!';">
+                        <strong style="font-size:0.85rem;color:var(--primary);"><i class="fas fa-bell me-1"></i>Equipment Reminder</strong>
+                        <small class="text-muted d-block">Bring water, cleats, shin guards</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 template-card" style="background:var(--off-white);border-radius:var(--radius-sm);cursor:pointer;"
+                         onclick="document.querySelector('input[name=subject]').value='Great Session Today!';document.querySelector('textarea[name=body]').value='What a fantastic session today! The kids showed incredible improvement. Keep up the great work at home with those practice drills!';">
+                        <strong style="font-size:0.85rem;color:var(--primary);"><i class="fas fa-star me-1"></i>Post-Session Update</strong>
+                        <small class="text-muted d-block">Share session highlights</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

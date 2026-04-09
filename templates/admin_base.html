@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-layout">
+    <div class="admin-sidebar">
+        <div class="px-3 mb-3">
+            <small class="text-uppercase" style="letter-spacing:2px;opacity:0.5;font-size:0.7rem;">Coach Dashboard</small>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
+                <i class="fas fa-tachometer-alt"></i>Dashboard
+            </a>
+            <a class="nav-link {% if request.endpoint in ['admin_programs', 'admin_program_new', 'admin_program_edit'] %}active{% endif %}" href="{{ url_for('admin_programs') }}">
+                <i class="fas fa-futbol"></i>Programs
+            </a>
+            <a class="nav-link {% if request.endpoint in ['admin_sessions', 'admin_attendance'] %}active{% endif %}" href="{{ url_for('admin_sessions') }}">
+                <i class="fas fa-calendar"></i>Sessions
+            </a>
+            <a class="nav-link {% if request.endpoint == 'admin_enrollments' %}active{% endif %}" href="{{ url_for('admin_enrollments') }}">
+                <i class="fas fa-users"></i>Enrollments
+            </a>
+            <a class="nav-link {% if request.endpoint == 'admin_payments' %}active{% endif %}" href="{{ url_for('admin_payments') }}">
+                <i class="fas fa-dollar-sign"></i>Payments
+                {% if pending_payments_count %}
+                <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem;">{{ pending_payments_count }}</span>
+                {% endif %}
+            </a>
+            <a class="nav-link {% if request.endpoint == 'admin_message' %}active{% endif %}" href="{{ url_for('admin_message') }}">
+                <i class="fas fa-envelope"></i>Messages
+                {% if unread_coach_messages %}
+                <span class="badge bg-danger ms-1" style="font-size:0.65rem;">{{ unread_coach_messages }}</span>
+                {% endif %}
+            </a>
+            <a class="nav-link {% if request.endpoint == 'admin_broadcast' %}active{% endif %}" href="{{ url_for('admin_broadcast') }}">
+                <i class="fas fa-bullhorn"></i>Broadcast
+            </a>
+            <a class="nav-link {% if request.endpoint == 'admin_reports' %}active{% endif %}" href="{{ url_for('admin_reports') }}">
+                <i class="fas fa-chart-bar"></i>Reports
+            </a>
+            <hr class="border-light mx-3 opacity-25">
+            <a class="nav-link" href="{{ url_for('index') }}">
+                <i class="fas fa-globe"></i>View Site
+            </a>
+            <a class="nav-link" href="{{ url_for('admin_logout') }}">
+                <i class="fas fa-sign-out-alt"></i>Log Out
+            </a>
+        </nav>
+    </div>
+    <div class="admin-content">
+        {% block admin_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

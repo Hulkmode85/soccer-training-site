@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}Schedule - {{ site_name }}{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
+<style>
+    .calendar-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        padding: 1.25rem;
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: 'Montserrat', sans-serif;
+    }
+    .legend-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    .status-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: center;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--light-gray);
+    }
+    .status-legend span {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+    .fc .fc-event {
+        border-radius: 8px;
+        padding: 3px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        border-left: 4px solid;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .fc .fc-event:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .fc .fc-daygrid-event {
+        white-space: normal;
+    }
+    .slot-tooltip {
+        position: fixed;
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        padding: 1rem 1.25rem;
+        z-index: 10000;
+        max-width: 280px;
+        pointer-events: none;
+        display: none;
+        border-left: 4px solid var(--primary);
+    }
+    .slot-tooltip .tt-program {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 0.95rem;
+    }
+    .slot-tooltip .tt-time {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+    .slot-tooltip .tt-spots {
+        font-weight: 700;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .tt-spots.available { color: #2e7d32; }
+    .tt-spots.almost-full { color: #f57c00; }
+    .tt-spots.full { color: #c62828; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="far fa-calendar-alt me-3"></i>Training Schedule</h1>
+        <p class="lead opacity-85">View all upcoming sessions and book your spot</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <!-- Legend -->
+        <div class="calendar-legend">
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#52b788;"></span>
+                Little Kicks U6
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#2196F3;"></span>
+                Junior Stars U8
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#FF9800;"></span>
+                Skill Builders U10
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#E91E63;"></span>
+                Rising Players U12
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#F44336;"></span>
+                Elite Youth U14
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#9C27B0;"></span>
+                Private 1-on-1
+            </div>
+            <div class="status-legend">
+                <span><i class="fas fa-circle text-success me-1" style="font-size:0.6rem;"></i> Available</span>
+                <span><i class="fas fa-circle text-warning me-1" style="font-size:0.6rem;"></i> Almost Full (1-2 spots)</span>
+                <span><i class="fas fa-circle me-1" style="font-size:0.6rem;color:#9e9e9e;"></i> Full (Waitlist)</span>
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <div id="calendar"></div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-muted"><i class="fas fa-mouse-pointer me-1"></i> Click on any session to book. Hover to see details.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Tooltip element -->
+<div class="slot-tooltip" id="slotTooltip">
+    <div class="tt-program"></div>
+    <div class="tt-time"></div>
+    <div class="tt-spots"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var tooltip = document.getElementById('slotTooltip');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        events: '/api/sessions',
+        eventClick: function(info) {
+            if (info.event.url) {
+                info.jsEvent.preventDefault();
+                window.location.href = info.event.url;
+            }
+        },
+        eventMouseEnter: function(info) {
+            var props = info.event.extendedProps;
+            if (!props.programName) return;
+
+            var ttProg = tooltip.querySelector('.tt-program');
+            var ttTime = tooltip.querySelector('.tt-time');
+            var ttSpots = tooltip.querySelector('.tt-spots');
+
+            ttProg.textContent = props.programName;
+            ttTime.innerHTML = '<i class="far fa-clock me-1"></i>' + props.time + ' <i class="fas fa-map-marker-alt ms-2 me-1"></i>' + (props.location || '');
+
+            if (props.capacity) {
+                var left = props.spotsLeft;
+                if (props.isFull) {
+                    ttSpots.textContent = 'FULL - Waitlist Available';
+                    ttSpots.className = 'tt-spots full';
+                } else if (left <= 2) {
+                    ttSpots.textContent = left + ' spot' + (left !== 1 ? 's' : '') + ' left!';
+                    ttSpots.className = 'tt-spots almost-full';
+                } else {
+                    ttSpots.textContent = props.enrolled + '/' + props.capacity + ' enrolled';
+                    ttSpots.className = 'tt-spots available';
+                }
+            } else {
+                ttSpots.textContent = 'Available';
+                ttSpots.className = 'tt-spots available';
+            }
+
+            tooltip.style.borderLeftColor = info.event.extendedProps.status === 'full' ? '#9e9e9e' : info.event.borderColor;
+            tooltip.style.display = 'block';
+
+            var rect = info.el.getBoundingClientRect();
+            tooltip.style.left = (rect.left + rect.width / 2 - 140) + 'px';
+            tooltip.style.top = (rect.bottom + 8) + 'px';
+        },
+        eventMouseLeave: function() {
+            tooltip.style.display = 'none';
+        },
+        eventDidMount: function(info) {
+            var props = info.event.extendedProps;
+            if (props.isFull) {
+                info.el.style.opacity = '0.65';
+            } else if (props.status === 'almost-full') {
+                // pulse effect for almost full
+                info.el.style.boxShadow = '0 0 0 2px rgba(255, 152, 0, 0.3)';
+            }
+        },
+        height: 'auto',
+        navLinks: true,
+        editable: false,
+        dayMaxEvents: true,
+    });
+    calendar.render();
+});
+</script>
+{% endblock %}

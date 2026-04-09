@@ -1,0 +1,78 @@
+{% extends "admin_base.html" %}
+{% block title %}Waitlist - Admin{% endblock %}
+
+{% block admin_content %}
+<h3 class="mb-4" style="color:var(--primary);font-weight:800;">
+    <i class="fas fa-list-ol me-2"></i>Waitlist Management
+</h3>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="portal-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="mb-0">{{ session.program.name }}</h5>
+                    <small class="text-muted">
+                        <i class="far fa-calendar me-1"></i>{{ session.start_time.strftime('%A, %B %d, %Y at %I:%M %p') }}
+                    </small>
+                    <br>
+                    <small>
+                        <span class="text-primary fw-bold">{{ session.enrolled_count }}/{{ session.program.max_capacity }}</span> enrolled
+                        <span class="mx-1">|</span>
+                        <span class="text-warning fw-bold">{{ waitlisted|length }}</span> on waitlist
+                    </small>
+                </div>
+                <a href="{{ url_for('admin_sessions') }}" class="btn-outline-custom btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </a>
+            </div>
+
+            {% if waitlisted %}
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Child</th>
+                            <th>Parent</th>
+                            <th>Contact</th>
+                            <th>Joined</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in waitlisted %}
+                        <tr>
+                            <td><span class="badge bg-warning text-dark">#{{ e.waitlist_position or loop.index }}</span></td>
+                            <td>
+                                <strong>{{ e.child.name }}</strong><br>
+                                <small class="text-muted">Age {{ e.child.age }}</small>
+                            </td>
+                            <td>{{ e.child.parent.name }}</td>
+                            <td>
+                                <small>{{ e.child.parent.email }}<br>{{ e.child.parent.phone or '' }}</small>
+                            </td>
+                            <td><small class="text-muted">{{ e.created_at.strftime('%b %d') }}</small></td>
+                            <td>
+                                <form method="POST" action="{{ url_for('admin_waitlist_promote', enrollment_id=e.id) }}"
+                                      onsubmit="return confirm('Promote {{ e.child.name }} from waitlist to confirmed?');">
+                                    <button type="submit" class="btn btn-sm btn-success rounded-pill">
+                                        <i class="fas fa-arrow-up me-1"></i>Promote
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="fas fa-list-ol fa-3x mb-3 opacity-25"></i>
+                <p>No one on the waitlist for this session.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
